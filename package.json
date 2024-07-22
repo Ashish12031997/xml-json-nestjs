@@ -1,0 +1,31 @@
+{
+  "name": "xml-to-json",
+  "version": "1.0.0",
+  "description": "this project transform xml data into json format and store in MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "build": "nest build",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "test": "jest",
+    "start:dev": "nodemon --exec 'ts-node -r tsconfig-paths/register' src/main.ts",
+    "start:prod": "npm run build && node main"
+  },
+  "keywords": [
+    "XML",
+    "JSON"
+  ],
+  "author": "Ashish Patadiya",
+  "license": "ISC",
+  "dependencies": {
+    "@nestjs/common": "^10.3.10",
+    "@nestjs/platform-express": "^10.3.10"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.2",
+    "@nestjs/testing": "^10.3.10",
+    "@types/jest": "^29.5.12",
+    "nodemon": "^3.1.4",
+    "ts-node": "^8.6.2",
+    "tsconfig-paths": "^3.9.0"
+  }
+}
