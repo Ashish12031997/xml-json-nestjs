@@ -12,6 +12,7 @@ services:
       - mongodb
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/development
+    restart: always
 
   mongodb:
     container_name: mongodb
