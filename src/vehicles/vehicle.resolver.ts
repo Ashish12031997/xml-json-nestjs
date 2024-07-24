@@ -33,7 +33,7 @@ export class VehicleResolver {
     return this.vehicleService.getAllVehicles(page, limit);
   }
 
-  @Query(returns =>VehicleInformation)
+  @Query(returns =>VehicleInformation, {nullable: true})
   /**
    * Retrieves the vehicle information for a given makeId.
    *
