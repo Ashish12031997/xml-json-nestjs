@@ -3,12 +3,20 @@ import { VehiclesService } from './vehicles.service'
 import { VehicleResolver } from './vehicle.resolver'
 import { HttpModule } from '@nestjs/axios'
 import { MongooseModule } from '@nestjs/mongoose'
-import { Vehicle, VehicleSchema } from './schemas/vehicles.schema'
+import {
+  Vehicle,
+  VehicleInformation,
+  VehicleSchema,
+  VehicleInformationSchema,
+} from './schemas/vehicles.schema'
 
 @Module({
   imports: [
     HttpModule,
-    MongooseModule.forFeature([{ name: Vehicle.name, schema: VehicleSchema }]),
+    MongooseModule.forFeature([
+      { name: Vehicle.name, schema: VehicleSchema },
+      { name: VehicleInformation.name, schema: VehicleInformationSchema },
+    ]),
   ],
   providers: [VehiclesService, VehicleResolver],
 })
