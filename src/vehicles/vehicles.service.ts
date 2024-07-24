@@ -109,6 +109,10 @@ export class VehiclesService {
     return await this.vehicleModel.find().skip(skip).limit(limit).exec();
   }
 
+  async getVehicleInformation(makeId: number): Promise<VehicleInformation | null>{
+    return await this.vehicleInformation.findOne({ makeId }).exec();
+  }
+
   /**
    * Parses an XML string and returns the parsed data.
    * @param xml The XML string to parse.
