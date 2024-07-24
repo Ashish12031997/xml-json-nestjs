@@ -13,7 +13,7 @@ export class Vehicle {
   /**
    * The unique identifier of the vehicle's make.
    */
-  @Prop({ unique: true })
+  @Prop()
   @Field()
   makeId?: number
 
@@ -22,7 +22,7 @@ export class Vehicle {
    */
   @Prop()
   @Field()
-  makeName?: string
+  makeName!: string
 }
 
 /**
@@ -30,9 +30,9 @@ export class Vehicle {
  */
 @Schema()
 @ObjectType()
-export class VehicleInformation {
-  /**
-   * The ID of the vehicle make.
+export class VehicleInformation{
+    /**
+   * The unique identifier of the vehicle's make.
    */
   @Prop()
   @Field()
@@ -43,7 +43,7 @@ export class VehicleInformation {
    */
   @Prop()
   @Field()
-  makeType?: number
+  makeTypeId?: number
 
   /**
    * The name of the vehicle make.
@@ -52,6 +52,25 @@ export class VehicleInformation {
   @Field()
   makeTypeName?: string
 }
+
+@Schema()
+@ObjectType()
+export class vehicleData{
+
+  
+  @Prop()
+  @Field()
+  makeId?: number
+  
+  @Prop()
+  @Field()
+  makeName?: string
+
+  @Prop({ type: [VehicleInformation] })
+  @Field(() => [VehicleInformation], { nullable: true })
+  vehicleTypes?: VehicleInformation[]
+}
+
 
 export const VehicleInformationSchema =
   SchemaFactory.createForClass(VehicleInformation)

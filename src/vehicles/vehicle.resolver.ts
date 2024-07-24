@@ -1,6 +1,6 @@
 import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { VehiclesService } from './vehicles.service';
-import { Vehicle,VehicleInformation } from './schemas/vehicles.schema';
+import { Vehicle,VehicleInformation, vehicleData } from './schemas/vehicles.schema';
 
 /**
  * Resolver for the Vehicle entity.
@@ -33,14 +33,14 @@ export class VehicleResolver {
     return this.vehicleService.getAllVehicles(page, limit);
   }
 
-  @Query(returns =>VehicleInformation, {nullable: true})
+  @Query(returns =>vehicleData, {nullable: true})
   /**
    * Retrieves the vehicle information for a given makeId.
    *
    * @param makeId - The ID of the make.
    * @returns A Promise that resolves to the vehicle information or null if not found.
    */
-  async getVehicleInformation(@Args('makeId', { type: () => Int }) makeId: number): Promise<VehicleInformation| null> {
+  async getVehicleInformation(@Args('makeId', { type: () => Int }) makeId: number): Promise<any| null> {
     return this.vehicleService.getVehicleInformation(makeId);
   }
 }
