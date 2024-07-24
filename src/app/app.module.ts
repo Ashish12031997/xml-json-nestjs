@@ -8,7 +8,7 @@ import { AppService } from '../app/app.service'
 @Module({
   imports: [
     HealthCheckModule,
-    MongooseModule.forRoot('mongodb://localhost:27017/development'),
+    MongooseModule.forRoot('mongodb://mongodb:27017/vehicles'),
     GraphqlModule,
   ],
   

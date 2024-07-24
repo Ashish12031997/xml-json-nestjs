@@ -79,7 +79,7 @@ export class VehiclesService {
 
         vehicleTypes.forEach(async (vehicleType: any) => {
           //  we will be storing vehicle information in chunks of 100 records
-          if (vehicleInfo && vehicleInfo.length % 100 == 0) {
+          if (vehicleInfo && vehicleInfo.length % 50 == 0) {
             await this.vehicleInformation.bulkWrite(vehicleInfo)
             this.logger.log(
               `Vehicle information stored successfully for ${vehicleInfo.length} records`
@@ -88,12 +88,14 @@ export class VehiclesService {
           }
 
           vehicleInfo.push({
-            insertOne: {
-              document: {
+            updateOne: {
+              filter: { makeId: id, makeTypeId: vehicleType.VehicleTypeId[0]},
+              update: {
                 makeTypeId: vehicleType.VehicleTypeId[0],
                 makeTypeName: vehicleType.VehicleTypeName[0],
                 makeId: id,
               },
+              upsert: true
             },
           })
         })
@@ -142,7 +144,6 @@ export class VehiclesService {
       makeName: vehiclemakeInformation[0].makeName,
       vehicleTypes: vehicleTypeInformation
     }
-    console.log(combinedData);
     
     return combinedData
   }
