@@ -6,6 +6,7 @@ import {
   Vehicle,
   VehicleInformation,
   VehicleDocument,
+  vehicleData,
 } from './schemas/vehicles.schema'
 import { HttpService } from '@nestjs/axios'
 
@@ -14,7 +15,7 @@ import { HttpService } from '@nestjs/axios'
  */
 @Injectable()
 export class VehiclesService {
-  private readonly logger = new Logger(VehiclesService.name);
+  private readonly logger = new Logger(VehiclesService.name)
 
   /**
    * Constructs a new instance of the VehiclesService class.
@@ -35,66 +36,76 @@ export class VehiclesService {
    */
   async fetchAndStoreVehicles(): Promise<void> {
     try {
-      let vehicleMakeIds: number[] = [];
+      let vehicleMakeIds: number[] = []
 
       const { data } = (await this.httpService
         .get('https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=XML')
-        .toPromise()) as { data: any };
+        .toPromise()) as { data: any }
 
-      const parsedData = await this.parseXML(data);
-      const vehicles = parsedData.Response.Results[0].AllVehicleMakes;
-      this.logger.log("All vehicle make information fetched successfully");
+      const parsedData = await this.parseXML(data)
+      const vehicles = parsedData.Response.Results[0].AllVehicleMakes
+      this.logger.log('All vehicle make information fetched successfully')
 
-      const bulkOperations = vehicles.map((vehicle: any) => ({
-        updateOne: {
-          filter: { makeId: vehicle.Make_ID[0] },
-          update: {
-            makeId: vehicle.Make_ID[0],
-            makeName: vehicle.Make_Name[0],
-          },
-          upsert: true,
-        },
-      }));
+      const bulkOperations = vehicles.map(
+        (vehicle: any) => (
+          vehicleMakeIds.push(vehicle.Make_ID[0]),
+          {
+            updateOne: {
+              filter: { makeId: vehicle.Make_ID[0] },
+              update: {
+                makeId: vehicle.Make_ID[0],
+                makeName: vehicle.Make_Name[0],
+              },
+              upsert: true,
+            },
+          }
+        )
+      )
 
-      await this.vehicleModel.bulkWrite(bulkOperations);
-      this.logger.log("Vehicle make information stored successfully");
+      await this.vehicleModel.bulkWrite(bulkOperations)
+      this.logger.log('Vehicle make information stored successfully')
 
-      let vehicleInfo: any[] = [];
+      let vehicleInfo: any[] = []
       for (const id of vehicleMakeIds) {
-        let vehicalDataUrl = `https://vpic.nhtsa.dot.gov/api/vehicles/GetVehicleTypesForMakeId/${id}?format=xml`;
+        let vehicalDataUrl = `https://vpic.nhtsa.dot.gov/api/vehicles/GetVehicleTypesForMakeId/${id}?format=xml`
         const { data } = (await this.httpService
           .get(vehicalDataUrl)
-          .toPromise()) as { data: any };
+          .toPromise()) as { data: any }
 
-        const parsedVehicleInfo = await this.parseXML(data);
+        const parsedVehicleInfo = await this.parseXML(data)
         const vehicleTypes = parsedVehicleInfo.Response.Results.flatMap(
           (vehicleInfo: any) => vehicleInfo.VehicleTypesForMakeIds || []
-        );
+        )
 
         vehicleTypes.forEach(async (vehicleType: any) => {
           //  we will be storing vehicle information in chunks of 100 records
           if (vehicleInfo && vehicleInfo.length % 100 == 0) {
-            await this.vehicleInformation.bulkWrite(vehicleInfo);
-            vehicleInfo = [];
-            this.logger.log(`Vehicle information stored successfully for ${vehicleInfo.length} records`);
+            await this.vehicleInformation.bulkWrite(vehicleInfo)
+            this.logger.log(
+              `Vehicle information stored successfully for ${vehicleInfo.length} records`
+            )
+            vehicleInfo = []
           }
 
           vehicleInfo.push({
             insertOne: {
               document: {
-                makeType: vehicleType.VehicleTypeId[0],
+                makeTypeId: vehicleType.VehicleTypeId[0],
                 makeTypeName: vehicleType.VehicleTypeName[0],
                 makeId: id,
               },
             },
-          });
-        });
-
-        await this.vehicleInformation.bulkWrite(vehicleInfo);
-        this.logger.log(`All Vehicle information stored successfully`);
+          })
+        })
       }
+
+      await this.vehicleInformation.bulkWrite(vehicleInfo)
+      this.logger.log(`All Vehicle information stored successfully`)
     } catch (error: any) {
-      this.logger.error(`Error fetching and storing vehicle data: ${error.message}`);
+      this.logger.error(
+        `Error fetching and storing vehicle data: ${error.message}`
+      )
+      throw error
     }
   }
 
@@ -105,12 +116,35 @@ export class VehiclesService {
    * @returns A Promise that resolves to an array of Vehicle objects.
    */
   async getAllVehicles(page: number, limit: number): Promise<Vehicle[]> {
-    const skip = (page - 1) * limit;
-    return await this.vehicleModel.find().skip(skip).limit(limit).exec();
+    const skip = (page - 1) * limit
+    return await this.vehicleModel.find().skip(skip).limit(limit).exec()
   }
 
-  async getVehicleInformation(makeId: number): Promise<VehicleInformation | null>{
-    return await this.vehicleInformation.findOne({ makeId }).exec();
+  async getVehicleInformation(makeId: number): Promise<any | null> {
+    const vehicleTypeInformation = await this.vehicleInformation
+      .find({ makeId }).select(['makeTypeId','makeTypeName'])
+      .exec()
+    
+    const vehiclemakeInformation = await this.vehicleModel
+      .find({ makeId }).select(['makeId','makeName'])
+      .exec()
+      
+    if (
+      !vehicleTypeInformation ||
+      !vehiclemakeInformation ||
+      vehiclemakeInformation.length === 0
+    ) {
+      return null
+    }
+
+    const combinedData: any = {
+      makeId: makeId,
+      makeName: vehiclemakeInformation[0].makeName,
+      vehicleTypes: vehicleTypeInformation
+    }
+    console.log(combinedData);
+    
+    return combinedData
   }
 
   /**
@@ -122,11 +156,11 @@ export class VehiclesService {
     return new Promise((resolve, reject) => {
       parseString(xml, (err: any, result: any) => {
         if (err) {
-          reject(err);
+          reject(err)
         } else {
-          resolve(result);
+          resolve(result)
         }
-      });
-    });
+      })
+    })
   }
 }
