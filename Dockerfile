@@ -6,11 +6,11 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install
+
 
 # Copy the application source code
 COPY . .
-
+RUN npm install
 # Build the application
 RUN npm run build
 

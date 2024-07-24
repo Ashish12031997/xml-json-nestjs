@@ -11,7 +11,7 @@ services:
     depends_on:
       - mongodb
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/development
+      - MONGODB_URI=mongodb://mongodb:27017/vehicles
     restart: always
 
   mongodb:
