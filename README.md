@@ -1,4 +1,4 @@
-# xml-json-nextjs
+# xml-json-nestjs
 This project fetches XML data from external API, converts it into JSON and stores it in MongoDB.
 This project is build using nestJs, express and TypeScript.
 
